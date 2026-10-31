@@ -1,11 +1,115 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="de">
 <head>
-  <meta charset="utf-8">
-  <meta http-equiv="refresh" content="0; url=LYWSD02%20Uhrzeit%20setzen.html">
-  <title>Redirecting</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Uhrzeit und Zeitzone der Xiaomi Mijia E-Ink-Uhr LYWSD02 direkt im Browser per Web Bluetooth setzen – ohne Mi-Home-App, ohne Konto, ohne Installation.">
+<title>LYWSD02 Uhrzeit setzen</title>
+<style>
+:root { --bg:#fff; --fg:#111; --btn:#0a66ff; --btnfg:#fff; --muted:#666; --line:#ddd; --code:#f2f2f2;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#111; --fg:#eee; --btn:#3b82f6; --muted:#aaa; --line:#333; --code:#1d1d1d; color-scheme:dark; } }
+:root[data-theme="dark"] { --bg:#111; --fg:#eee; --btn:#3b82f6; --muted:#aaa; --line:#333; --code:#1d1d1d; }
+body { margin:0; background:var(--bg); color:var(--fg); font-family:-apple-system,system-ui,sans-serif;
+  min-height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:2rem 1rem; text-align:center; }
+h1 { font-size:1.4rem; margin:0 0 .5rem; }
+p { color:var(--muted); max-width:28rem; }
+button { font-size:1.2rem; padding:1rem 2rem; border:0; border-radius:1rem; background:var(--btn); color:var(--btnfg); margin:1.5rem 0; }
+button:disabled { opacity:.5; }
+#out { font-size:1rem; min-height:3rem; white-space:pre-line; }
+#info { max-width:36rem; width:100%; margin-top:2rem; text-align:left; border-top:1px solid var(--line); padding-top:1rem; }
+#info summary { cursor:pointer; font-weight:600; padding:.4rem 0; }
+#info h2 { font-size:1rem; margin:1.2rem 0 .3rem; }
+#info p, #info li { color:var(--muted); font-size:.92rem; line-height:1.45; max-width:none; }
+#info ul { padding-left:1.2rem; margin:.3rem 0; }
+#info table { border-collapse:collapse; font-size:.85rem; width:100%; }
+#info th, #info td { border:1px solid var(--line); padding:.3rem .45rem; vertical-align:top; text-align:left; }
+#info .scroll { overflow-x:auto; }
+code { background:var(--code); border-radius:.25rem; padding:0 .2rem; font-size:.85em; word-break:break-all; }
+a { color:var(--btn); }
+</style>
 </head>
 <body>
-  <p><a href="LYWSD02%20Uhrzeit%20setzen.html">Continue</a></p>
+<h1>Xiaomi-Thermometer: Uhrzeit setzen</h1>
+<p>Funktioniert in Chrome (Mac/Android) oder in der Bluefy-App auf dem iPhone. Die Uhrzeit und Zeitzone werden vom Gerät übernommen, auf dem du diese Seite öffnest.</p>
+<button id="go">Uhrzeit jetzt setzen</button>
+<div id="out"></div>
+
+<section id="info">
+<details>
+<summary>Was ist das? Unterstützte Geräte &amp; technische Infos</summary>
+
+<h2>Worum geht es?</h2>
+<p>Die Xiaomi/Mijia-E-Ink-Uhr <b>LYWSD02</b> zeigt Uhrzeit, Datum, Temperatur und Luftfeuchtigkeit an, hat aber keine eigene Funkuhr und keine Tasten zum Stellen der Zeit. Normalerweise wird sie über die Mi-Home-App synchronisiert – mit Xiaomi-Konto, Cloud und Pairing. Diese Seite erledigt das in einem Klick direkt im Browser per <b>Web Bluetooth</b>: kein Konto, keine App-Installation, keine Daten verlassen dein Gerät.</p>
+
+<h2>Unterstützte Geräte</h2>
+<ul>
+  <li><b>Xiaomi Mijia LYWSD02</b> / <b>LYWSD02MMC</b> – „Xiaomi Temperature and Humidity Monitor Clock“ (rechteckige E-Ink-Uhr, 2× CR2032, hergestellt von Miaomiaoce).</li>
+  <li>Gesucht wird nach Geräten, deren Bluetooth-Name mit <code>LYWSD02</code> beginnt.</li>
+  <li><b>Nicht</b> unterstützt: LYWSD03MMC (kleines LCD-Thermometer ohne Uhr), MHO-C401, CGG1 u. a. – die haben keine Uhrzeit-Anzeige.</li>
+</ul>
+
+<h2>Chipsatz / Hardware-Revisionen</h2>
+<div class="scroll"><table>
+  <tr><th>Revision</th><th>SoC</th><th>Hinweis</th></tr>
+  <tr><td>ältere Geräte</td><td>Dialog / Renesas <b>DA14585</b> (Bluetooth LE, Cortex-M0)</td><td>Funktioniert mit dem hier verwendeten GATT-Protokoll.</td></tr>
+  <tr><td>neuere Geräte (ca. ab 2023/24)</td><td>Telink <b>TLSR8250</b> (TLSR8250F512ET32)</td><td>Laut Community-Berichten; mit dieser Seite noch nicht verifiziert.</td></tr>
+</table></div>
+<p>Laut Xiaomi-Datenblatt: Bluetooth Low Energy 5.0, Stromversorgung 2× CR2032. Welche Revision du hast, siehst du ohne Öffnen nicht – das Zeit-Protokoll ist bei beiden gleich gedacht.</p>
+
+<h2>Browser-Unterstützung</h2>
+<ul>
+  <li>✅ Chrome / Edge / Opera auf Android, macOS, Windows, ChromeOS, Linux (ggf. Flag <code>chrome://flags/#enable-web-bluetooth</code>)</li>
+  <li>✅ iPhone / iPad: nur über die App <b>Bluefy</b> (Safari unterstützt kein Web Bluetooth)</li>
+  <li>❌ Firefox, Safari</li>
+  <li>Die Seite muss über HTTPS (z.&nbsp;B. GitHub Pages) oder <code>localhost</code> geöffnet werden.</li>
+</ul>
+
+<h2>Wie es funktioniert</h2>
+<p>Die Seite verbindet sich per GATT mit dem Service <code>ebe0ccb0-7a0a-4b0c-8a1a-6ff2997da3a6</code> und schreibt 5 Bytes in die Zeit-Characteristic <code>ebe0ccb7-7a0a-4b0c-8a1a-6ff2997da3a6</code>:</p>
+<div class="scroll"><table>
+  <tr><th>Bytes</th><th>Inhalt</th></tr>
+  <tr><td>0–3</td><td>Unix-Zeitstempel (Sekunden, UTC), uint32 little-endian</td></tr>
+  <tr><td>4</td><td>Zeitzonen-Offset in ganzen Stunden, int8 (z.&nbsp;B. <code>+1</code> MEZ, <code>+2</code> MESZ)</td></tr>
+</table></div>
+<p>Weitere Characteristics derselben Service (hier nicht genutzt): <code>…ccc1</code> Temperatur/Feuchte, <code>…ccc4</code> Batterie, <code>…ccbe</code> Einheit °C/°F, <code>…ccbc</code> stündliche Min/Max-Historie.</p>
+
+<h2>Hinweise &amp; Einschränkungen</h2>
+<ul>
+  <li><b>Sommer-/Winterzeit:</b> Die Uhr speichert einen festen Offset und stellt nicht selbst um – nach der Zeitumstellung die Seite einfach erneut ausführen.</li>
+  <li><b>Halbstündige Zeitzonen</b> (z.&nbsp;B. Indien UTC+5:30) kann das Gerät nicht darstellen; der Offset wird auf ganze Stunden abgeschnitten.</li>
+  <li>Gerät wird nicht gefunden? Mi-Home bzw. andere Apps trennen, die die Uhr gerade verbunden halten, und näher ans Gerät gehen.</li>
+</ul>
+
+<p>Quellcode: <a href="https://github.com/EugenNY/lywsd02">github.com/EugenNY/lywsd02</a></p>
+</details>
+</section>
+
+<script>
+const SVC = 'ebe0ccb0-7a0a-4b0c-8a1a-6ff2997da3a6';
+const CHR = 'ebe0ccb7-7a0a-4b0c-8a1a-6ff2997da3a6';
+const btn = document.getElementById('go'), out = document.getElementById('out');
+btn.onclick = async () => {
+  btn.disabled = true;
+  try {
+    if (!navigator.bluetooth) throw new Error('Web Bluetooth wird in diesem Browser nicht unterstützt (iPhone: Bluefy-App verwenden).');
+    out.textContent = 'Suche Gerät …';
+    const dev = await navigator.bluetooth.requestDevice({ filters:[{ namePrefix:'LYWSD02' }], optionalServices:[SVC] });
+    out.textContent = 'Verbinde …';
+    const srv = await (await dev.gatt.connect()).getPrimaryService(SVC);
+    const chr = await srv.getCharacteristic(CHR);
+    const now = new Date();
+    const ts = Math.floor(now.getTime()/1000);
+    const tz = -now.getTimezoneOffset()/60;
+    const buf = new Uint8Array(5);
+    new DataView(buf.buffer).setUint32(0, ts, true);
+    buf[4] = tz & 0xff;
+    await chr.writeValue(buf);
+    out.textContent = 'Fertig: ' + now.toLocaleString('de-DE') + ' (UTC' + (tz>=0?'+':'') + tz + ')';
+    dev.gatt.disconnect();
+  } catch (e) { out.textContent = 'Fehler: ' + e.message; }
+  btn.disabled = false;
+};
+</script>
 </body>
 </html>
